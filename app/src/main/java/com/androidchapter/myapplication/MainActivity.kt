@@ -3,6 +3,7 @@
 package com.androidchapter.myapplication
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
@@ -11,6 +12,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -61,12 +63,12 @@ fun TopHeader(totalPerPerson: Double = 0.0) {
 //            .clip(shape = RoundedCornerShape(corner = CornerSize(12.dp)))
             .clip(shape = CircleShape.copy(all = CornerSize(12.dp))),
 //        color = Color.Black
-        color = Color(0xFFE9D7F7)
+        color = Color(0xFFE9D7F7),
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             val total = "%.2f".format(totalPerPerson)
             Text(
@@ -96,8 +98,18 @@ fun DefaultPreview() {
 @Preview
 @Composable
 fun MainContent() {
+    BillForm(){ billAmt ->
+        Log.d("AMT", "MainContent: $billAmt")
+    }
+}
+
+@Composable
+fun BillForm(
+    modifier: Modifier = Modifier,
+    onValChange: (String) -> Unit = {}
+) {
     val totalBillState = remember {
-        mutableStateOf(value = "")
+        mutableStateOf("")
     }
 
     val validState = remember(totalBillState.value) {
@@ -105,28 +117,31 @@ fun MainContent() {
     }
 
     val keyboardController = LocalSoftwareKeyboardController.current
-
     androidx.compose.material.Surface(
         modifier = Modifier
             .padding(2.dp)
             .fillMaxWidth(),
         shape = RoundedCornerShape(corner = CornerSize(8.dp)),
-        border = BorderStroke(width = 1.dp, color = Color.LightGray)
-
+        border = BorderStroke(width = 1.dp, color = Color.LightGray),
+        color = Color.Blue
     ) {
 
-        Column {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+        ) {
             InputField(
+                modifier = Modifier.fillMaxWidth(),
                 valueState = totalBillState,
                 labelId = "Enter Bill",
                 enabled = true,
                 isSingleLine = true,
                 onAction = KeyboardActions {
                     if (!validState) return@KeyboardActions
-                    //Todo - onvaluechanged
+                    onValChange(totalBillState.value.trim())
 
                     keyboardController?.hide()
-                }
+                },
+                backgroundColor = Color.Red
             )
         }
     }
